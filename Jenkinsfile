@@ -116,31 +116,25 @@ pipeline {
         }
 
         stage('End-to-End Tests') {
-            steps {
-                nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                    sh '''
-                        nohup npm start > app.log 2>&1 &
-                        sleep 10
-                        curl -f http://localhost:${DEPLOY_PORT}
-                        npm run test:e2e
-                    '''
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.54.2-noble'
+                    args '--ipc=host'
                 }
             }
-
+            steps {
+                sh '''
+                    npm ci
+                    nohup npm start > app.log 2>&1 &
+                    sleep 10
+                    curl -f http://localhost:3000
+                    npx playwright test
+                '''
+            }
             post {
                 always {
                     archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
-
-                    junit testResults: 'test-results/junit.xml', allowEmptyResults: true
-
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'test-results/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Report'
-                    ])
+                    junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
                 }
             }
         }
