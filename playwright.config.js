@@ -21,15 +21,17 @@ module.exports = defineConfig({
     workers: process.env.CI ? 1 : undefined,
 
     // Reporter to use
-    reporter: process.env.CI ? [
-        ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
-        ['junit', { outputFile: './test-results/junit-e2e.xml' }],
-        ['json', { outputFile: './test-results/test-results.json' }]
-    ] : [
-        ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
-        ['json', { outputFile: './test-results/test-results.json' }],
-        ['junit', { outputFile: './test-results/junit-e2e.xml' }]
-    ],
+  reporter: process.env.CI ? [
+    ['allure-playwright', { resultsDir: './allure-results' }],
+    ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
+    ['junit', { outputFile: './test-results/junit-e2e.xml' }],
+    ['json', { outputFile: './test-results/test-results.json' }]
+  ] : [
+    ['allure-playwright', { resultsDir: './allure-results' }],
+    ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
+    ['json', { outputFile: './test-results/test-results.json' }],
+    ['junit', { outputFile: './test-results/junit-e2e.xml' }]
+  ],
 
     // Shared settings for all the projects below
     use: {
