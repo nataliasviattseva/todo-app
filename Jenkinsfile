@@ -133,46 +133,47 @@ pipeline {
                     npm run test:e2e
                 '''
             }
-                post {
-                    always {
-                        sh '''
-                            if [ -d test-results/allure-history ]; then
-                                mkdir -p test-results/allure-results/history
-                                cp -r test-results/allure-history/. test-results/allure-results/history/ || true
-                            fi
+            post {
+                always {
+                    sh '''
+                        if [ -d test-results/allure-history ]; then
+                            mkdir -p test-results/allure-results/history
+                            cp -r test-results/allure-history/. test-results/allure-results/history/ || true
+                        fi
 
-                            npx allure generate test-results/allure-results -o test-results/allure-report --clean || true
+                        npx allure generate test-results/allure-results -o test-results/allure-report --clean || true
 
-                            if [ -d test-results/allure-report/history ]; then
-                                rm -rf test-results/allure-history
-                                mkdir -p test-results/allure-history
-                                cp -r test-results/allure-report/history/. test-results/allure-history/ || true
-                            fi
-                        '''
+                        if [ -d test-results/allure-report/history ]; then
+                            rm -rf test-results/allure-history
+                            mkdir -p test-results/allure-history
+                            cp -r test-results/allure-report/history/. test-results/allure-history/ || true
+                        fi
+                    '''
 
-                        archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
 
-                        junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
+                    junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
 
-                        publishHTML([
-                            allowMissing: true,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'test-results/playwright-report',
-                            reportFiles: 'index.html',
-                            reportName: 'Playwright Report'
-                        ])
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-results/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Report'
+                    ])
 
-                        publishHTML([
-                            allowMissing: true,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'test-results/allure-report',
-                            reportFiles: 'index.html',
-                            reportName: 'Allure Report'
-                        ])
-                    }
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-results/allure-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Allure Report'
+                    ])
                 }
+            }
+        }
 
         stage('Code Coverage') {
             steps {
