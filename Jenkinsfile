@@ -168,6 +168,7 @@ pipeline {
                     ])
 
                     allure([
+                        commandline: 'Allure',
                         includeProperties: false,
                         jdk: '',
                         results: [[path: 'allure-results']]
