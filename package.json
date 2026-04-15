@@ -1,0 +1,89 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "description": "A modern, modular todo application built with vanilla JavaScript following MVC architecture",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "npx http-server -p 3000 -o",
+    "dev": "npx http-server -p 3000 -c-1",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest tests/unit --testPathPattern=tests/unit",
+    "test:integration": "jest tests/integration --testPathPattern=tests/integration",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --collectCoverageFrom='src/**/*.js' --testPathPattern='tests/(unit|integration)'",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:ci": "npm run test:unit -- --ci --coverage --testResultsProcessor=jest-junit && npm run test:integration -- --ci --testResultsProcessor=jest-junit",
+    "install:browsers": "playwright install",
+    "lint": "echo 'Linting not configured yet'",
+    "build": "echo 'No build process required for vanilla JS app'",
+    "clean": "rm -rf test-results coverage node_modules/.cache",
+    "audit:fix": "npm audit fix",
+    "audit:check": "npm audit --audit-level=moderate"
+  },
+  "keywords": ["todo", "javascript", "html", "css", "productivity", "mvc", "modular"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "jest-junit": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/dom": "^9.0.0",
+    "@playwright/test": "^1.40.0",
+    "jsdom": "^23.0.0"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/app.js",
+      "!node_modules/**",
+      "!tests/**",
+      "!coverage/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html", "clover"],
+    "testMatch": [
+      "<rootDir>/tests/**/*.test.js",
+      "<rootDir>/tests/**/*.spec.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "testResultsProcessor": "jest-junit",
+    "reporters": [
+      "default",
+      ["jest-junit", {
+        "outputDirectory": "./",
+        "outputName": "junit.xml",
+        "uniqueOutputName": "false",
+        "classNameTemplate": "{classname}",
+        "titleTemplate": "{title}"
+      }]
+    ]
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/todo-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/todo-app/issues"
+  },
+  "homepage": "https://github.com/yourusername/todo-app#readme"
+}

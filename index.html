@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Todo App</h1>
+        </header>
+        
+        <main>
+            <div class="todo-form">
+                <input type="text" id="todoInput" placeholder="Add a new todo..." maxlength="100">
+                <button id="addBtn" onclick="todoApp.addTodo()">Add Todo</button>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="todoApp.filterTodos('all')">All</button>
+                <button class="filter-btn" onclick="todoApp.filterTodos('active')">Active</button>
+                <button class="filter-btn" onclick="todoApp.filterTodos('completed')">Completed</button>
+            </div>
+            
+            <div class="todo-stats">
+                <span id="todoCount">0 todos</span>
+                <button id="clearCompleted" onclick="todoApp.clearCompleted()">Clear Completed</button>
+            </div>
+            
+            <ul id="todoList" class="todo-list">
+                <!-- Todos will be dynamically added here -->
+            </ul>
+        </main>
+    </div>
+    
+    <!-- Load modules in dependency order -->
+    <script src="src/utils/taskUtils.js"></script>
+    <script src="src/models/taskModel.js"></script>
+    <script src="src/services/taskService.js"></script>
+    <script src="src/controllers/taskController.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>

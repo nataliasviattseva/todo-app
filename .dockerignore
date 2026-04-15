@@ -1,0 +1,107 @@
+# Node.js dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage and results
+coverage
+test-results
+junit.xml
+
+# Build artifacts
+dist
+build
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.test
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD files
+.github
+.jenkins
+Jenkinsfile
+.travis.yml
+.circleci
+
+# Documentation
+*.md
+!README.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+.tmp
+
+# Cache directories
+.cache
+.npm
+.yarn
+
+# Editor backup files
+*~
+*.bak
+*.orig
+
+# Development tools
+.eslintrc*
+.prettierrc*
+jest.config.js
+playwright.config.js
+
+# Backup files
+*.backup
+*.old
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows
+*.exe
+*.msi
+*.cab
+*.dmp
+
+# Linux
+*~
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
