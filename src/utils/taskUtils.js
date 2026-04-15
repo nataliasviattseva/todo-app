@@ -12,9 +12,12 @@ class TaskUtils {
     static escapeHtml(text) {
         if (typeof text !== 'string') return '';
         
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     /**
@@ -52,8 +55,14 @@ class TaskUtils {
      */
     static formatDate(dateInput) {
         try {
+            if (dateInput === null || dateInput === undefined) {
+                return 'Invalid date';
+            }
             const date = new Date(dateInput);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {
+            if (isNaN(date.getTime())) {
+                return 'Invalid date';
+            }
+            return date.toLocaleDateString('en-US') + ' ' + date.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit'
             });
@@ -70,6 +79,9 @@ class TaskUtils {
     static getRelativeTime(dateInput) {
         try {
             const date = new Date(dateInput);
+            if (isNaN(date.getTime())) {
+                return 'Unknown';
+            }
             const now = new Date();
             const diffMs = now - date;
             const diffSec = Math.floor(diffMs / 1000);
@@ -212,6 +224,7 @@ class TaskUtils {
     }
 
     /**
+    /**
      * Sanitize input by removing dangerous HTML tags
      * @param {string} input - Input to sanitize
      * @returns {string} Sanitized input
@@ -219,11 +232,10 @@ class TaskUtils {
     static sanitizeInput(input) {
         if (typeof input !== 'string') return '';
         
-        // Remove HTML tags while preserving text content
-        const temp = document.createElement('div');
-        temp.innerHTML = input;
-        return temp.textContent || temp.innerText || '';
-    }
+        // Remove dangerous HTML tags and their content
+        return input
+            .replace(/<script[^>]*>.*?<\/script>/gi, '')
+            .replace(/<[^>]*>/g, '');
     }
 
     /**

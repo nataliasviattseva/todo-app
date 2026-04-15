@@ -5,7 +5,10 @@
 
 async function globalSetup(config) {
   console.log('🚀 Starting Todo App E2E Test Suite');
-  console.log(`📍 Base URL: ${config.use.baseURL}`);
+  
+  // Safely access baseURL from config
+  const baseURL = config.use?.baseURL || process.env.BASE_URL || 'http://localhost:3000';
+  console.log(`📍 Base URL: ${baseURL}`);
   console.log('⏳ Waiting for application to be ready...');
   
   // Additional global setup logic can be added here

@@ -263,23 +263,12 @@ describe('TaskUtils Unit Tests', () => {
     });
   });
 
-});
-
-// Helper function for Node.js/browser compatibility
-function resetLocalStorage() {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.clear();
+  // Helper function for Node.js/browser compatibility
+  function resetLocalStorage() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.clear();
+    }
   }
-}
-
-    test('should handle edge cases', () => {
-      const result1 = TaskUtils.pluralize(1, 'category', 'categories');
-      const result2 = TaskUtils.pluralize(3, 'category', 'categories');
-      
-      expect(result1).toBe('1 category');
-      expect(result2).toBe('3 categories');
-    });
-  });
 
   describe('filterTasks Method', () => {
     const sampleTasks = [

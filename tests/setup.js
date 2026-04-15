@@ -3,6 +3,12 @@
  * This file runs before all tests to set up the testing environment
  */
 
+// Polyfill for TextEncoder/TextDecoder (required for JSDOM in Node.js)
+// These must be available before JSDOM is imported
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 const { JSDOM } = require('jsdom');
 require('@testing-library/jest-dom');
 
