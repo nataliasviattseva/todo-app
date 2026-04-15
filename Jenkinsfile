@@ -123,18 +123,27 @@ pipeline {
                 }
             }
             steps {
+                checkout scm
                 sh '''
                     npm ci
                     nohup npm start > app.log 2>&1 &
                     sleep 10
                     curl -f http://localhost:3000
-                    npx playwright test
+                    npm run test:e2e
                 '''
             }
             post {
                 always {
                     archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
                     junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-results/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Report'
+                    ])
                 }
             }
         }
