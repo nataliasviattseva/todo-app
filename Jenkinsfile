@@ -157,21 +157,21 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'coverage/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
+                    junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: 'coverage/lcov-report',
+                        reportDir: 'test-results/playwright-report',
                         reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
+                        reportName: 'Playwright Report'
                     ])
-
                     allure([
                         commandline: 'Allure',
                         includeProperties: false,
                         jdk: '',
-                        results: [[path: 'allure-results']]
+                        results: [[path: 'test-results/allure-results']]
                     ])
                 }
             }

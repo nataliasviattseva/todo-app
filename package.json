@@ -10,7 +10,7 @@
         "test:unit": "jest tests/unit --testPathPattern=tests/unit",
         "test:integration": "jest tests/integration --testPathPattern=tests/integration",
         "test:e2e": "playwright test",
-        "test:e2e:ci": "CI=true playwright test --config=playwright.config.js --reporter=junit",
+        "test:e2e:ci": "CI=true playwright test --config=playwright.config.js",
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:headed": "playwright test --headed",
         "test:e2e:debug": "playwright test --debug",
