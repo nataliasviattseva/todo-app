@@ -181,17 +181,16 @@ pipeline {
                     sh 'npm run test:coverage'
                 }
             }
-            post {
+           post {
                 always {
-                    archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
-                    junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
+                    archiveArtifacts artifacts: 'coverage/**/*', allowEmptyArchive: true
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: 'test-results/playwright-report',
+                        reportDir: 'coverage/lcov-report',
                         reportFiles: 'index.html',
-                        reportName: 'Playwright Report'
+                        reportName: 'Coverage Report'
                     ])
                 }
             }
