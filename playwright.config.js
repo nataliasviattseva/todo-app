@@ -22,10 +22,11 @@ module.exports = defineConfig({
 
     // Reporter to use
     reporter: process.env.CI ? [
+        ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
         ['junit', { outputFile: './test-results/junit-e2e.xml' }],
         ['json', { outputFile: './test-results/test-results.json' }]
     ] : [
-        ['html', { outputFolder: './test-results/playwright-report' }],
+        ['html', { outputFolder: './test-results/playwright-report', open: 'never' }],
         ['json', { outputFile: './test-results/test-results.json' }],
         ['junit', { outputFile: './test-results/junit-e2e.xml' }]
     ],
