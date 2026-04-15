@@ -116,79 +116,31 @@ pipeline {
         }
 
         stage('End-to-End Tests') {
-            environment {
-                CI = 'true'
-                DISPLAY = ':99'
-            }
             steps {
                 nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
                     sh '''
-                        mkdir -p test-results
-
-                        if command -v Xvfb >/dev/null 2>&1; then
-                            Xvfb :99 -ac -screen 0 1280x1024x16 > /dev/null 2>&1 &
-                            export DISPLAY=:99
-                        fi
-
                         nohup npm start > app.log 2>&1 &
-                        APP_PID=$!
-                        echo $APP_PID > .server.pid
-
-                        echo "Waiting for server to start..."
-                        i=1
-                        while [ $i -le 30 ]; do
-                            if curl -f http://localhost:${DEPLOY_PORT} >/dev/null 2>&1; then
-                                echo "Server is ready!"
-                                break
-                            fi
-
-                            if [ $i -eq 30 ]; then
-                                echo "Server failed to start within 30 seconds"
-                                cat app.log || true
-                                exit 1
-                            fi
-
-                            i=$((i + 1))
-                            sleep 1
-                        done
-
-                        npm run test:e2e:ci || {
-                            echo "E2E tests failed, capturing logs..."
-                            tail -50 app.log || true
-                            exit 1
-                        }
+                        sleep 10
+                        curl -f http://localhost:${DEPLOY_PORT}
+                        npm run test:e2e
                     '''
                 }
             }
+
             post {
                 always {
                     archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
-                    junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
-                    
-                    // Only try to publish HTML report if it exists
-                    script {
-                        if (fileExists('test-results/playwright-report/index.html')) {
-                            publishHTML([
-                                allowMissing: true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: 'test-results/playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright Report'
-                            ])
-                        }
-                    }
-                }
-                cleanup {
-                    sh '''
-                        # Kill the application server
-                        if [ -f .server.pid ]; then
-                            kill $(cat .server.pid) || true
-                            rm -f .server.pid
-                        fi
-                        pkill -f http-server || true
-                        pkill -f "node.*3000" || true
-                    '''
+
+                    junit testResults: 'test-results/junit.xml', allowEmptyResults: true
+
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-results/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Report'
+                    ])
                 }
             }
         }
