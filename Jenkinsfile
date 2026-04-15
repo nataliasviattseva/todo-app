@@ -133,21 +133,46 @@ pipeline {
                     npm run test:e2e
                 '''
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
-                    junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'test-results/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Report'
-                    ])
+                post {
+                    always {
+                        sh '''
+                            if [ -d test-results/allure-history ]; then
+                                mkdir -p test-results/allure-results/history
+                                cp -r test-results/allure-history/. test-results/allure-results/history/ || true
+                            fi
+
+                            npx allure generate test-results/allure-results -o test-results/allure-report --clean || true
+
+                            if [ -d test-results/allure-report/history ]; then
+                                rm -rf test-results/allure-history
+                                mkdir -p test-results/allure-history
+                                cp -r test-results/allure-report/history/. test-results/allure-history/ || true
+                            fi
+                        '''
+
+                        archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
+
+                        junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
+
+                        publishHTML([
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'test-results/playwright-report',
+                            reportFiles: 'index.html',
+                            reportName: 'Playwright Report'
+                        ])
+
+                        publishHTML([
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'test-results/allure-report',
+                            reportFiles: 'index.html',
+                            reportName: 'Allure Report'
+                        ])
+                    }
                 }
-            }
-        }
 
         stage('Code Coverage') {
             steps {
@@ -166,12 +191,6 @@ pipeline {
                         reportDir: 'test-results/playwright-report',
                         reportFiles: 'index.html',
                         reportName: 'Playwright Report'
-                    ])
-                    allure([
-                        commandline: 'Allure',
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'test-results/allure-results']]
                     ])
                 }
             }

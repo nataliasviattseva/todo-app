@@ -24,7 +24,9 @@
         "build": "echo 'No build process required for vanilla JS app'",
         "clean": "rm -rf test-results coverage node_modules/.cache",
         "audit:fix": "npm audit fix",
-        "audit:check": "npm audit --audit-level=moderate"
+        "audit:check": "npm audit --audit-level=moderate",
+        "allure:generate": "allure generate test-results/allure-results -o test-results/allure-report --clean",
+        "allure:open": "allure open test-results/allure-report"
     },
     "keywords": [
         "todo",
