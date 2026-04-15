@@ -118,8 +118,9 @@ pipeline {
         stage('End-to-End Tests') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.54.2-noble'
+                    image 'mcr.microsoft.com/playwright:v1.59.1-noble'
                     args '--ipc=host'
+                    reuseNode true
                 }
             }
             steps {
