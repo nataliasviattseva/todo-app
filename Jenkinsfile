@@ -46,12 +46,19 @@ pipeline {
         }
 
         stage('Install Dependencies') {
+            environment {
+                CI = 'true'
+            }
             steps {
                 echo 'Installing npm dependencies...'
                 nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
                     sh '''
+                        # Install npm packages
                         npm ci --prefer-offline --no-audit
-                        npm run install:browsers
+                        
+                        # Install CI-specific dependencies
+                        chmod +x scripts/install-ci-deps.sh
+                        npm run install:ci
                     '''
                 }
             }
@@ -109,28 +116,80 @@ pipeline {
         }
 
         stage('End-to-End Tests') {
+            environment {
+                CI = 'true'
+                DISPLAY = ':99'
+            }
             steps {
                 nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
                     sh '''
+                        # Create test results directory
+                        mkdir -p test-results
+                        
+                        # Start virtual display for headless browsers (if available)
+                        if command -v Xvfb >/dev/null 2>&1; then
+                            Xvfb :99 -ac -screen 0 1280x1024x16 > /dev/null 2>&1 &
+                            export DISPLAY=:99
+                        fi
+                        
+                        # Start application server in background
                         nohup npm start > app.log 2>&1 &
-                        sleep 10
-                        curl -f http://localhost:${DEPLOY_PORT}
-                        npm run test:e2e -- --reporter=junit
+                        APP_PID=$!
+                        echo $APP_PID > .server.pid
+                        
+                        # Wait for server to be ready
+                        echo "Waiting for server to start..."
+                        for i in {1..30}; do
+                            if curl -f http://localhost:${DEPLOY_PORT} >/dev/null 2>&1; then
+                                echo "Server is ready!"
+                                break
+                            fi
+                            if [ $i -eq 30 ]; then
+                                echo "Server failed to start within 30 seconds"
+                                cat app.log || true
+                                exit 1
+                            fi
+                            sleep 1
+                        done
+                        
+                        # Run E2E tests with proper configuration
+                        npm run test:e2e:ci || {
+                            echo "E2E tests failed, capturing logs..."
+                            tail -50 app.log || true
+                            exit 1
+                        }
                     '''
                 }
             }
             post {
                 always {
                     archiveArtifacts artifacts: 'app.log,test-results/**/*', allowEmptyArchive: true
-                    junit testResults: 'test-results/**/*.xml,playwright-report/**/*.xml,results.xml', allowEmptyResults: true
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Report'
-                    ])
+                    junit testResults: 'test-results/junit-e2e.xml', allowEmptyResults: true
+                    
+                    // Only try to publish HTML report if it exists
+                    script {
+                        if (fileExists('test-results/playwright-report/index.html')) {
+                            publishHTML([
+                                allowMissing: true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'test-results/playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright Report'
+                            ])
+                        }
+                    }
+                }
+                cleanup {
+                    sh '''
+                        # Kill the application server
+                        if [ -f .server.pid ]; then
+                            kill $(cat .server.pid) || true
+                            rm -f .server.pid
+                        fi
+                        pkill -f http-server || true
+                        pkill -f "node.*3000" || true
+                    '''
                 }
             }
         }

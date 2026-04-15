@@ -21,10 +21,13 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   
   // Reporter to use
-  reporter: [
+  reporter: process.env.CI ? [
+    ['junit', { outputFile: './test-results/junit-e2e.xml' }],
+    ['json', { outputFile: './test-results/test-results.json' }]
+  ] : [
     ['html', { outputFolder: './test-results/playwright-report' }],
     ['json', { outputFile: './test-results/test-results.json' }],
-    ['junit', { outputFile: './test-results/junit.xml' }]
+    ['junit', { outputFile: './test-results/junit-e2e.xml' }]
   ],
   
   // Shared settings for all the projects below
@@ -36,7 +39,7 @@ module.exports = defineConfig({
     trace: 'on-first-retry',
     
     // Record video for failed tests
-    video: 'retain-on-failure',
+    video: process.env.CI ? 'off' : 'retain-on-failure',
     
     // Take screenshot on failure
     screenshot: 'only-on-failure',
@@ -45,11 +48,47 @@ module.exports = defineConfig({
     actionTimeout: 10000,
     
     // Navigation timeout
-    navigationTimeout: 30000
+    navigationTimeout: 30000,
+    
+    // CI-specific browser launch options
+    launchOptions: process.env.CI ? {
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
+    } : {}
   },
 
   // Configure projects for major browsers
-  projects: [
+  projects: process.env.CI ? [
+    // Only run Chromium in CI for stability and speed
+    {
+      name: 'chromium',
+      use: { 
+        ...devices['Desktop Chrome'],
+        headless: true,
+        launchOptions: {
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox', 
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
+          ]
+        }
+      },
+    }
+  ] : [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -88,10 +127,14 @@ module.exports = defineConfig({
 
   // Run your local dev server before starting the tests
   webServer: {
-    command: 'npm start',
+    command: process.env.CI ? 'nohup npm start > /dev/null 2>&1 & echo $! > .server.pid && sleep 5' : 'npm start',
     port: 3000,
     reuseExistingServer: !process.env.CI,
-    timeout: 120000
+    timeout: 120000,
+    cwd: process.cwd(),
+    env: {
+      NODE_ENV: 'test'
+    }
   },
   
   // Output directories
