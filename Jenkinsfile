@@ -123,36 +123,35 @@ pipeline {
             steps {
                 nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
                     sh '''
-                        # Create test results directory
                         mkdir -p test-results
-                        
-                        # Start virtual display for headless browsers (if available)
+
                         if command -v Xvfb >/dev/null 2>&1; then
                             Xvfb :99 -ac -screen 0 1280x1024x16 > /dev/null 2>&1 &
                             export DISPLAY=:99
                         fi
-                        
-                        # Start application server in background
+
                         nohup npm start > app.log 2>&1 &
                         APP_PID=$!
                         echo $APP_PID > .server.pid
-                        
-                        # Wait for server to be ready
+
                         echo "Waiting for server to start..."
-                        for i in {1..30}; do
+                        i=1
+                        while [ $i -le 30 ]; do
                             if curl -f http://localhost:${DEPLOY_PORT} >/dev/null 2>&1; then
                                 echo "Server is ready!"
                                 break
                             fi
+
                             if [ $i -eq 30 ]; then
                                 echo "Server failed to start within 30 seconds"
                                 cat app.log || true
                                 exit 1
                             fi
+
+                            i=$((i + 1))
                             sleep 1
                         done
-                        
-                        # Run E2E tests with proper configuration
+
                         npm run test:e2e:ci || {
                             echo "E2E tests failed, capturing logs..."
                             tail -50 app.log || true
